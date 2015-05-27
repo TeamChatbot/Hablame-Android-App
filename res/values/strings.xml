@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ChatbotApp</string>
+    <string name="action_settings">Settings</string>
+	<string name="turnRecognitionOnOff"></string>
+    <string name="speechOutput">Shows Speech input and Error Messages</string>
+    <string name="chatbotAnswer">Shows Answer from Chatbot</string>
+    <string name="listeningForName">Respond only, when Name is said </string>
+
+</resources>

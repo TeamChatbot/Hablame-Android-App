@@ -25,3 +25,12 @@ proguard/
 
 # Log Files
 *.log
+
+# intellij iml files
+*.iml
+
+# intellij folder
+/.idea/
+
+# android gen folder
+/gen/
