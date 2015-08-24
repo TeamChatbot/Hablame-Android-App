@@ -1,0 +1,89 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="de.morpheus.chatbot.chatbotapp.MainActivity" >
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_alignParentTop="true"
+            android:layout_width="fill_parent"
+            android:layout_height="109.33dp"
+            android:background="#4caf50"
+            android:id="@+id/head">
+
+        <!--
+        <ImageView
+                android:layout_width="240.67dp"
+                android:layout_height="78.33dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16.00dp"
+                android:id="@+id/image_header"
+                android:background="@mipmap/header"/>
+        -->
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Háblame"
+                android:id="@+id/logoTop"
+                android:layout_gravity="center_horizontal"
+                />
+
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_below="@id/head"
+            android:layout_width="fill_parent"
+            android:layout_height="1.33dp"
+            android:background="#ffebee"
+            android:id="@+id/linetop">
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_below="@+id/linetop"
+            android:layout_width="fill_parent"
+            android:layout_height="415.00dp"
+            android:background="#bdbdbd"
+            android:id="@+id/middle">
+
+        <ImageButton
+                android:layout_width="236.00dp"
+                android:layout_height="236.00dp"
+                android:id="@+id/logo"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                android:background="@mipmap/logo"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_below="@+id/middle"
+            android:layout_width="fill_parent"
+            android:layout_height="1.33dp"
+            android:background="#ffebee"
+            android:id="@+id/linebottom">
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_below="@+id/linebottom"
+            android:layout_width="fill_parent"
+            android:layout_height="63.00dp"
+            android:background="#4caf50"
+            android:id="@+id/foot">
+
+
+        <Button
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Auf Wiedersehen."
+                android:id="@+id/button_start"
+                android:layout_gravity="center_horizontal"
+                android:background="@android:color/transparent"/>
+    </LinearLayout>
+
+</RelativeLayout>
