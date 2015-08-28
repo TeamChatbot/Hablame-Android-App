@@ -48,8 +48,12 @@ public class Conversation
   {
     super.onCreate( savedInstanceState );
     setContentView( R.layout.activity_conversation );
-    setRequestedOrientation( ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ); //Disabled Screen Rotation, set to only
-    // Portrait Mode
+    setRequestedOrientation( ActivityInfo.SCREEN_ORIENTATION_PORTRAIT );
+    /**
+     * Disabled Screen Rotation, set to only Portrait Mode
+     */
+
+
 
     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
     StrictMode.setThreadPolicy( policy );
@@ -70,10 +74,10 @@ public class Conversation
     speechInputLevel = (ProgressBar) findViewById( R.id.speechInputLevel );
     speechInputLevel.setVisibility( View.VISIBLE );
 
-    /*
-    Get the provided Data from the MainActivity
-    - here: the Username given by the User -
-    and assign it to the Username-TextView tvUserName
+    /**
+     *     Get the provided Data from the MainActivity
+     - here: the Username given by the User -
+     and assign it to the Username-TextView tvUserName
      */
     Intent intentForwardJump = getIntent();
     String userName = intentForwardJump.getExtras().getString( "userName" );
@@ -81,18 +85,18 @@ public class Conversation
     tvUserName = (TextView) findViewById( R.id.tvUserName );
     tvUserName.setText( userName );
 
-    /*
-    Initialize the recognitionService Intent and start the Service.
+    /**
+     * Initialize the recognitionService Intent and start the Service.
      */
     recognitionService = new Intent( this, RecognitionService.class );
     startService( recognitionService );
+    
+    /**
+     *    Exit the Conversation via click-action on buttonEndConversation,
+     stop the RecognitionService and go back to the MainActivity.
 
-    /*
-    Exit the Conversation via click-action on buttonEndConversation,
-    stop the RecognitionService and go back to the MainActivity.
-
-    Delete the Conversation-Activity from the Backstack,
-    to serve correctly the double-click exit function.
+     Delete the Conversation-Activity from the Backstack,
+     to serve correctly the double-click exit function.
      */
     intentBackJump = new Intent( this, MainActivity.class );
     intentBackJump.addFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP

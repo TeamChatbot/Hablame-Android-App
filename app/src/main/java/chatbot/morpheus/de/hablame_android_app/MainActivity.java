@@ -52,13 +52,13 @@ public class MainActivity
 
     intentForwardJump = new Intent( this, Conversation.class );
 
-    /*
-    setting a custom Font for the header Topline ("Háblame");
-    Font: Logobloqo2.ttf in main/Assets/Fonts;
-    URL: http://www.dafont.com/de/logobloqo2.font
-    License: "Free for commercial and personal use."
-    Up to Date: 27.08.2015
-    */
+    /**
+     *     setting a custom Font for the header Topline ("Háblame");
+     Font: Logobloqo2.ttf in main/Assets/Fonts;
+     URL: http://www.dafont.com/de/logobloqo2.font
+     License: "Free for commercial and personal use."
+     Up to Date: 27.08.2015
+     */
     Typeface custom_font = Typeface.createFromAsset( getAssets(), "fonts/Logobloqo2.ttf" );
     headerTopLine.setTypeface( custom_font );
 
@@ -67,11 +67,12 @@ public class MainActivity
       @Override
       public void onClick ( View v )
       {
-        /*
-        Jump to Conversation Activity if the username is not null,
-        else give back an error message on the screen.
-        Provide the Username to the Conversation Activity.
-        */
+
+        /**
+         *         Jump to Conversation Activity if the username is not null,
+         else give back an error message on the screen.
+         Provide the Username to the Conversation Activity.
+         */
         if ( userName.getText().toString().equals( "" ) )
         {
           Toast toast = Toast.makeText( getApplicationContext(), "Bitte gib einen Namen an!", Toast.LENGTH_SHORT );
@@ -94,10 +95,9 @@ public class MainActivity
     this.doubleBackToExitPressedOnce = false;
   }
 
-  /*
-  Implemented functionality to exit the application via
-  double-click on the back button from Android.
-  Give back a Message to the User if the Button was pressed only once.
+  /**Implemented functionality to exit the application via
+   *double-click on the back button from Android.
+   *Give back a Message to the User if the Button was pressed only once.
    */
   @Override
   public void onBackPressed ()
