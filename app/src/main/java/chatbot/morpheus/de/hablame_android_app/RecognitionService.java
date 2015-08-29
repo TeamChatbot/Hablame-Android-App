@@ -2,6 +2,8 @@ package chatbot.morpheus.de.hablame_android_app;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import android.app.Service;
 import android.content.Context;
@@ -15,6 +17,9 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import com.mashape.unirest.http.HttpResponse;
+import de.fhws.hablame.service.api.HablameClient;
+
 
 public class RecognitionService extends Service implements RecognitionListener{
 
@@ -22,7 +27,6 @@ public class RecognitionService extends Service implements RecognitionListener{
   private AudioManager audioManager;
   private SpeechRecognizer speechRecognizer = null;
   private Intent speechRecognizerIntent;
-  //TODO private WebService webService;
   private String speech;
   private String clearedSpeech;
   private String messageFromChatbot;
@@ -32,6 +36,9 @@ public class RecognitionService extends Service implements RecognitionListener{
   private Locale localeSpanish = new Locale ("es", "ES"); //neue Locale zum umstellen auf Spanisch
   protected static boolean callSuccessful = false;
 
+  //TODO private WebService webService;
+  private HablameClient client = null;
+
   public IBinder onBind(Intent intent) {
     return null;
   }
@@ -39,10 +46,12 @@ public class RecognitionService extends Service implements RecognitionListener{
   public void onCreate() {
 
     speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-    speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-    speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.GERMANY); //f�r spanisch durch localeSpanish ersetzen
+    speechRecognizerIntent.putExtra( RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM );
+    speechRecognizerIntent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.GERMANY ); //f�r spanisch durch localeSpanish ersetzen
 
     //TODO webService = new WebService();
+    client = new HablameClient();
+
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -68,23 +77,23 @@ public class RecognitionService extends Service implements RecognitionListener{
       });
     }
 
-    speechRecognizer.startListening(speechRecognizerIntent);
+    speechRecognizer.startListening( speechRecognizerIntent );
 
     return START_STICKY;
   }
 
   public void onReadyForSpeech(Bundle params) {
-    Log.i(LOG_TAG, "onReadyForSpeech");
+    Log.i( LOG_TAG, "onReadyForSpeech" );
   }
 
   public void onBeginningOfSpeech() {
     Log.i(LOG_TAG, "onBeginningOfSpeech");
-    Conversation.speechInputLevel.setMax(10);
+    Conversation.speechInputLevel.setMax( 10 );
   }
 
   public void onRmsChanged(float rmsdB) {
     Log.i(LOG_TAG, "onRmsChanged: " + rmsdB);
-    Conversation.speechInputLevel.setProgress((int) rmsdB);
+    Conversation.speechInputLevel.setProgress( (int) rmsdB );
   }
 
   public void onBufferReceived(byte[] buffer) {
@@ -92,19 +101,19 @@ public class RecognitionService extends Service implements RecognitionListener{
   }
 
   public void onEndOfSpeech() {
-    Log.i(LOG_TAG, "onEndOfSpeech");
+    Log.i( LOG_TAG, "onEndOfSpeech" );
   }
 
   public void onError(int error) {
 
     speechRecognizer.cancel();
-    String errorMessage = ErrorDescription.getErrorText(error);
+    String errorMessage = ErrorDescription.getErrorText( error );
 
     Log.d(LOG_TAG, "FAILED " + errorMessage);
     Conversation.speechOutput.setText(errorMessage);
 
     if(error != 5) {
-      speechRecognizer.startListening(speechRecognizerIntent);
+      speechRecognizer.startListening( speechRecognizerIntent );
     }
   }
 
@@ -134,7 +143,7 @@ public class RecognitionService extends Service implements RecognitionListener{
   public boolean checkIfNameIsSaid() {
 
     if(speech.contains(name) | speech.contains(xname) == true) {
-      Log.i(LOG_TAG, "Name wurde erkannt: " +name);
+      Log.i( LOG_TAG, "Name wurde erkannt: " + name );
       clearedSpeech = speech.replace(name.toString(), "");
       clearedSpeech = speech.replace(xname.toString(), "");
 
@@ -147,7 +156,23 @@ public class RecognitionService extends Service implements RecognitionListener{
 
   public void doExecution(String input) {
 
-    //TODO messageFromChatbot = webService.sendMessageToChatbot(input);
+    try
+    {
+      //TODO messageFromChatbot = webService.sendMessageToChatbot(input);
+      Future<HttpResponse<String>> future = this.client.getReplyForMessageAsync( input );
+      HttpResponse<String> response;                      //hier kommt irgendwo der fehler der die app zum absturz bringt
+      response = future.get();
+      String answer = response.getBody();
+      messageFromChatbot = answer;
+    }
+    catch ( InterruptedException e )
+    {
+      e.printStackTrace();
+    }
+    catch ( ExecutionException e )
+    {
+      e.printStackTrace();
+    }
 
     if(callSuccessful == true) {
 
