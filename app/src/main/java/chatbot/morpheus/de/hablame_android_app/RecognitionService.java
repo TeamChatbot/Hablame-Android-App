@@ -21,214 +21,258 @@ import com.mashape.unirest.http.HttpResponse;
 import de.fhws.hablame.service.api.HablameClient;
 
 
-public class RecognitionService extends Service implements RecognitionListener{
+public class RecognitionService
+        extends Service
+        implements RecognitionListener
+{
 
   private String LOG_TAG = "SpeechRecognitionActivity";
   private AudioManager audioManager;
   private SpeechRecognizer speechRecognizer = null;
   private Intent speechRecognizerIntent;
   private String speech;
-  private String clearedSpeech;
-  private String messageFromChatbot;
   private TextToSpeech textToSpeech;
   private CharSequence name = "alice";
   private CharSequence xname = "Alice";
-  private Locale localeSpanish = new Locale ("es", "ES"); //neue Locale zum umstellen auf Spanisch
-  protected static boolean callSuccessful = false;
+  private boolean listening = false;
 
-  //TODO private WebService webService;
   private HablameClient client = null;
 
-  public IBinder onBind(Intent intent) {
+  public IBinder onBind ( Intent intent )
+  {
     return null;
   }
 
-  public void onCreate() {
+  public void onCreate ()
+  {
 
-    speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-    speechRecognizerIntent.putExtra( RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM );
-    speechRecognizerIntent.putExtra( RecognizerIntent.EXTRA_LANGUAGE, Locale.GERMANY ); //f�r spanisch durch localeSpanish ersetzen
+    this.speechRecognizerIntent = new Intent ( RecognizerIntent.ACTION_RECOGNIZE_SPEECH );
+    this.speechRecognizerIntent.putExtra ( RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                           RecognizerIntent.LANGUAGE_MODEL_FREE_FORM );
+    this.speechRecognizerIntent.putExtra ( RecognizerIntent.EXTRA_LANGUAGE,
+                                           Locale.GERMANY ); //f�r spanisch durch localeSpanish ersetzen
 
     //TODO webService = new WebService();
-    client = new HablameClient();
+    this.client = new HablameClient ();
 
   }
 
-  public int onStartCommand(Intent intent, int flags, int startId) {
+  public int onStartCommand ( Intent intent, int flags, int startId )
+  {
 
-    Log.i(LOG_TAG, "onStartCommand");
-    audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-    Log.i(LOG_TAG, "Device muted");
+    Log.i ( LOG_TAG, "onStartCommand" );
+    this.audioManager = (AudioManager) getSystemService ( Context.AUDIO_SERVICE );
+    this.audioManager.setStreamMute ( AudioManager.STREAM_MUSIC, true );
+    Log.i ( LOG_TAG, "Device muted" );
 
-    if(speechRecognizer == null) {
+    if ( this.speechRecognizer == null )
+    {
 
-      speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-      speechRecognizer.setRecognitionListener(this);
+      this.speechRecognizer = SpeechRecognizer.createSpeechRecognizer ( this );
+      this.speechRecognizer.setRecognitionListener ( this );
     }
 
-    if(textToSpeech == null) {
+    if ( this.textToSpeech == null )
+    {
 
-      textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-        public void onInit(int status) {
-          if(status!=TextToSpeech.ERROR)
-            textToSpeech.setLanguage(Locale.GERMANY); //f�r spanisch durch localeSpanish ersetzen
+      this.textToSpeech = new TextToSpeech ( this.getApplicationContext (), new TextToSpeech.OnInitListener ()
+      {
+        public void onInit ( int status )
+        {
+          if ( status != TextToSpeech.ERROR )
+            RecognitionService.this.textToSpeech.setLanguage ( Locale.GERMANY );
         }
-      });
+      } );
     }
 
-    speechRecognizer.startListening( speechRecognizerIntent );
+    this.reStartListening ();
 
-    return START_STICKY;
+
+    return Service.START_STICKY;
   }
 
-  public void onReadyForSpeech(Bundle params) {
-    Log.i( LOG_TAG, "onReadyForSpeech" );
+  private void reStartListening ()
+  {
+    if ( this.listening)
+      this.speechRecognizer.cancel ();
+
+    this.speechRecognizer.setRecognitionListener ( this );
+
+    this.speechRecognizer.startListening ( this.speechRecognizerIntent );
+    this.listening = true;
   }
 
-  public void onBeginningOfSpeech() {
-    Log.i(LOG_TAG, "onBeginningOfSpeech");
-    Conversation.speechInputLevel.setMax( 10 );
+  @Override
+  public void onReadyForSpeech ( Bundle params )
+  {
+
   }
 
-  public void onRmsChanged(float rmsdB) {
-    Log.i(LOG_TAG, "onRmsChanged: " + rmsdB);
-    Conversation.speechInputLevel.setProgress( (int) rmsdB );
+  public void onBeginningOfSpeech ()
+  {
+    Log.i ( LOG_TAG, "onBeginningOfSpeech" );
+    Conversation.speechInputLevel.setMax ( 10 );
   }
 
-  public void onBufferReceived(byte[] buffer) {
-    Log.i(LOG_TAG, "onBufferReceived: " + buffer);
+  public void onRmsChanged ( float rmsdB )
+  {
+    Log.i ( LOG_TAG, "onRmsChanged: " + rmsdB );
+    Conversation.speechInputLevel.setProgress ( (int) rmsdB );
   }
 
-  public void onEndOfSpeech() {
-    Log.i( LOG_TAG, "onEndOfSpeech" );
+  @Override
+  public void onBufferReceived ( byte[] buffer )
+  {
+
   }
 
-  public void onError(int error) {
+  @Override
+  public void onEndOfSpeech ()
+  {
 
-    speechRecognizer.cancel();
-    String errorMessage = ErrorDescription.getErrorText( error );
+  }
 
-    Log.d(LOG_TAG, "FAILED " + errorMessage);
-    Conversation.speechOutput.setText(errorMessage);
+  public void onError ( int error )
+  {
+//    if ( error == SpeechRecognizer.ERROR_CLIENT || error == SpeechRecognizer.ERROR_NETWORK )
+//    {
+//      this.speechRecognizer.cancel ();
+//    }
 
-    if(error != 5) {
-      speechRecognizer.startListening( speechRecognizerIntent );
+    String errorMessage = ErrorDescription.getErrorText ( error );
+
+    Log.d ( LOG_TAG, "FAILED " + errorMessage );
+    Conversation.speechOutput.setText ( errorMessage );
+
+    this.reStartListening ();
+  }
+
+  public void onResults ( Bundle results )
+  {
+
+    //this.callSuccessful = true;
+    Log.i ( LOG_TAG, "onResults" );
+    //this.speechRecognizer.cancel ();
+    ArrayList<String> text = results.getStringArrayList ( SpeechRecognizer.RESULTS_RECOGNITION );
+    this.speech = text.get ( 0 );
+
+//    if ( Conversation.onListeningForName == true )
+//    {
+//
+//      if ( this.checkIfNameIsSaid () == true )
+//      {
+//        this.doExecution ( this.clearedSpeech );
+//      }
+//      else
+//      {
+//        Conversation.speechOutput.setText ( "Name wurde nicht gesagt" );
+//        this.speechRecognizer.reStartListening ( this.speechRecognizerIntent );
+//      }
+//    }
+//    else
+    {
+      this.doExecution ( this.speech );
     }
   }
 
-  public void onResults(Bundle results) {
+  @Override
+  public void onPartialResults ( Bundle partialResults )
+  {
 
-    callSuccessful = true;
-    Log.i(LOG_TAG, "onResults");
-    speechRecognizer.cancel();
-    ArrayList<String> text = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-    speech = text.get(0);
-
-    if(Conversation.onListeningForName == true) {
-
-      if(checkIfNameIsSaid() == true) {
-        doExecution(clearedSpeech);
-      }
-      else {
-        Conversation.speechOutput.setText("Name wurde nicht gesagt");
-        speechRecognizer.startListening(speechRecognizerIntent);
-      }
-    }
-    else {
-      doExecution(speech);
-    }
   }
 
-  public boolean checkIfNameIsSaid() {
+  @Override
+  public void onEvent ( int eventType, Bundle params )
+  {
 
-    if(speech.contains(name) | speech.contains(xname) == true) {
-      Log.i( LOG_TAG, "Name wurde erkannt: " + name );
-      clearedSpeech = speech.replace(name.toString(), "");
-      clearedSpeech = speech.replace(xname.toString(), "");
+  }
+
+  public boolean checkIfNameIsSaid ()
+  {
+    if ( speech.contains ( name ) || speech.contains ( xname ) == true )
+    {
+      Log.i ( LOG_TAG, "Name wurde erkannt: " + name );
 
       return true;
     }
-    else {
+    else
+    {
       return false;
     }
   }
 
-  public void doExecution(String input) {
+  public void doExecution ( String speechInput )
+  {
+    if ( speechInput == null )
+      return;
+
+    String chatbotAnswer = null;
 
     try
     {
-      //TODO messageFromChatbot = webService.sendMessageToChatbot(input);
-      Future<HttpResponse<String>> future = this.client.getReplyForMessageAsync( input );
-      HttpResponse<String> response;                      //hier kommt irgendwo der fehler der die app zum absturz bringt
-      response = future.get();
-      String answer = response.getBody();
-      messageFromChatbot = answer;
+      Future<HttpResponse<String>> future = this.client.getReplyForMessageAsync ( speechInput );
+      HttpResponse<String> response;
+      response = future.get (); // blocking!
+      chatbotAnswer = response.getBody ();
     }
-    catch ( InterruptedException e )
+    catch ( InterruptedException | ExecutionException e )
     {
-      e.printStackTrace();
+      e.printStackTrace ();
     }
-    catch ( ExecutionException e )
+
+
+    Log.i ( LOG_TAG, "ChatbotService successful called" );
+
+    Conversation.speechOutput.setText ( speechInput );
+    Conversation.chatbotAnswer.setText ( chatbotAnswer );
+
+    audioManager.setStreamMute ( AudioManager.STREAM_MUSIC, false );
+    Log.i ( LOG_TAG, "Device unmuted" );
+
+    if ( this.textToSpeech != null )
     {
-      e.printStackTrace();
-    }
+      if ( chatbotAnswer != null )
+      {
+        if ( !this.textToSpeech.isSpeaking () )
+        {
+          //TODO: Add check if chatbotAnswer is may bigger than getMaxSpeechInputLength() of TextToSpeech!
 
-    if(callSuccessful == true) {
-
-      Log.i(LOG_TAG, "ChatbotService successful called");
-
-      Conversation.speechOutput.setText(input);
-      Conversation.chatbotAnswer.setText(messageFromChatbot);
-
-      audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-      Log.i(LOG_TAG, "Device unmuted");
-
-      if(textToSpeech!=null) {
-        if(messageFromChatbot!=null) {
-          if (!textToSpeech.isSpeaking()) {
-            CharSequence toSpeak = messageFromChatbot;
-            textToSpeech.speak(toSpeak.toString(), TextToSpeech.QUEUE_FLUSH, null);
-            Log.i(LOG_TAG, "textToSpeech");
-          }
-        }
-        else {
-          Conversation.chatbotAnswer.setText("Request to Chatbot WebService failed");
+          // used for android min sdk >= 21
+          //this.textToSpeech.speak ( chatbotAnswer, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID ().toString () );
+          // used for android min sdk < 21
+          this.textToSpeech.speak ( chatbotAnswer, TextToSpeech.QUEUE_FLUSH, null );
+          Log.i ( LOG_TAG, "textToSpeech" );
         }
       }
-
-      while(textToSpeech.isSpeaking()) {
-
+      else
+      {
+        Conversation.chatbotAnswer.setText ( "Request to Chatbot WebService failed" );
       }
-      audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-      Log.i(LOG_TAG, "Device muted");
-      speechRecognizer.startListening(speechRecognizerIntent);
     }
 
-    else {
-      Conversation.speechOutput.setText(input);
-      Conversation.chatbotAnswer.setText("Chatbot returned NULL");
-      speechRecognizer.startListening(speechRecognizerIntent);
+    // TODO: Is there a better way to wait until the tts is finished speaking?
+    while ( this.textToSpeech.isSpeaking () )
+    {
+      // intentionally empty!
     }
+    audioManager.setStreamMute ( AudioManager.STREAM_MUSIC, true );
+    Log.i ( LOG_TAG, "Device muted" );
+//    speechRecognizer.startListening ( this.speechRecognizerIntent );
+    this.reStartListening ();
   }
 
-  public void onPartialResults(Bundle partialResults) {
-    Log.i(LOG_TAG, "onPartialResults");
-  }
+  public void onDestroy ()
+  {
 
-  public void onEvent(int eventType, Bundle params) {
-    Log.i(LOG_TAG, "onEvent");
-  }
+    this.audioManager.setStreamMute ( AudioManager.STREAM_MUSIC, false );
+    this.speechRecognizer.cancel ();
+    this.speechRecognizer.destroy ();
 
-  public void onDestroy(){
-
-    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-    speechRecognizer.destroy();
-
-    if(textToSpeech!=null){
-      textToSpeech.stop();
-      textToSpeech.shutdown();
+    if ( this.textToSpeech != null )
+    {
+      this.textToSpeech.stop ();
+      this.textToSpeech.shutdown ();
     }
-    super.onDestroy();
+    super.onDestroy ();
   }
 }
