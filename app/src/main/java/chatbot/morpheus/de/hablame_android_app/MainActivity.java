@@ -1,18 +1,20 @@
 package chatbot.morpheus.de.hablame_android_app;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.StrictMode;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
 
 
-public class MainActivity
-        extends Activity
+public class MainActivity extends Activity
 {
   //Variable declarations
   //Buttons
@@ -26,6 +28,11 @@ public class MainActivity
 
   //Strings
   protected static String userNameString;
+
+  //Service
+  private boolean mBound;
+  public RecognitionService service;
+
 
   //Intents
   private Intent intentForwardJump = null;
@@ -92,8 +99,28 @@ public class MainActivity
   {
 
     super.onResume();
+    this.service.restartListening();
     this.doubleBackToExitPressedOnce = false;
   }
+
+
+  /** Defines callbacks for service binding, passed to bindService() */
+  private ServiceConnection mConnection = new ServiceConnection() {
+
+    @Override
+    public void onServiceConnected(ComponentName className,
+                                   IBinder ibinder) {
+      // We've bound to LocalService, cast the IBinder and get LocalService instance
+      RecognitionService.LocalBinder binder = (RecognitionService.LocalBinder) ibinder;
+      service = binder.getService();
+      mBound = true;
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName arg0) {
+      mBound = false;
+    }
+  };
 
   /**Implemented functionality to exit the application via
    *double-click on the back button from Android.
@@ -113,9 +140,7 @@ public class MainActivity
 
   protected void onPause ()
   {
-
     super.onPause();
-
   }
 
   protected void onDestroy ()
