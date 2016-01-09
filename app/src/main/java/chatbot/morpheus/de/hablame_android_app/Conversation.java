@@ -15,7 +15,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
+//TODO FIX REPLACE WITH FRAGMENT
 public class Conversation
         extends Activity
 {
@@ -25,6 +25,7 @@ public class Conversation
   protected static ImageButton logoGreen;
 
   //Text
+  //TODO FIXME REMOVE STATIC
   protected static TextView headerTopLine;
   protected static TextView headerBottomLine;
   protected static TextView tvUserName;
