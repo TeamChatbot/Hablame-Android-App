@@ -2,17 +2,15 @@ package chatbot.morpheus.de.hablame_android_app;
 
 import android.speech.SpeechRecognizer;
 
-public class ErrorDescription
+public class SpeechyErrorDescription
 {
-
-  private static String errorMessage;
 
   public static String getErrorText ( int errorCode )
   {
+    String errorMessage = "";
 
     switch ( errorCode )
     {
-
       case SpeechRecognizer.ERROR_AUDIO:
         errorMessage = "Audio recording error";
         break;

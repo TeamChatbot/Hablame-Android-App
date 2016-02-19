@@ -8,7 +8,9 @@
     <string name="chatbotAnswer">Shows Answer from Chatbot</string>
     <string name="listeningForName">Respond only, when Name is said</string>
     <string name="title_activity_conversation">Conversation</string>
-
     <string name="hello_world">Hello world!</string>
+    <string name="hblame">Háblame</string>
+    <string name="startstring">Hallo, ich bin Háblame das sprechende Faultier.</string>
+    <string name="wieistdeinname">Wie ist dein Name?</string>
 
 </resources>
