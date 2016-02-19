@@ -73,7 +73,7 @@ public class ConversationActivity extends Activity implements UiCallBack {
                         toEditText();
                     } else {
                         toTextView();
-                        currentUser.storeUser(userName.getText());
+                        currentUser.storeToPreferences(userName.getText());
                     }
 
                     return true;

@@ -57,4 +57,12 @@
         android:background="@drawable/bubble2f"
         android:layout_below="@+id/tvBotName"
         android:layout_centerHorizontal="true"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_above="@+id/tvBotName"
+        android:layout_alignEnd="@+id/tvUserName"
+        android:layout_marginBottom="54dp"/>
 </RelativeLayout>

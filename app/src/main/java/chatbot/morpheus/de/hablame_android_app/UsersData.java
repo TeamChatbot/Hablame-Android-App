@@ -11,28 +11,25 @@ import android.text.TextUtils;
 public class UsersData {
 
     private static final String USERKEY = "username";
-    private final Activity activity;
-    private boolean isKnownUser = false;
+    private static final String USERNA_NAME = "user_name";
+    private final Context context;
 
-    public UsersData(Activity activity){
-        this.activity = activity;
+    public UsersData(Context context){
+        this.context = context;
     }
 
     public String loadFromPreferences() {
-        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context.getSharedPreferences(USERNA_NAME, Context.MODE_PRIVATE);
         return sharedPref.getString(USERKEY, "Alice");
     }
 
-    public void storeUser(CharSequence name){
-        SharedPreferences sharedPref = activity.getPreferences(Context.MODE_PRIVATE);
+    public void storeToPreferences(CharSequence name){
+        SharedPreferences sharedPref = context.getSharedPreferences(USERNA_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(USERKEY, name.toString());
         editor.commit();
     }
 
-    public boolean isKnownUser(){
-        return isKnownUser;
-    }
 
 
 }
