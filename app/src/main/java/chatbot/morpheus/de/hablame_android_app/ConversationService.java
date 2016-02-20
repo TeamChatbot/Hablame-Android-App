@@ -70,7 +70,7 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
 
     @Override
     public void onSoundLevelChanged(final float value) {
-        if(this.callback!=null){
+        if (this.callback != null) {
             this.callback.onSoundLevelChanged(value);
         }
     }
@@ -99,15 +99,21 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
     public void onDestroy() {
         abondonAudioFocus();
         super.onDestroy();
+        speechy.destroy();
+        texty.destroy();
+
     }
 
     public void onPause() {
         abondonAudioFocus();
+        speechy.stopRecog();
+        texty.stop();
     }
 
     public void onResume() {
         requestAudioFocus();
-        //TODO sppech recognizer pause
+        speechy.restartRecog();
+        texty.create();
     }
 
     private void abondonAudioFocus() {
