@@ -5,8 +5,12 @@ import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
+import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 
@@ -18,36 +22,32 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
     private static final String TAG = Texty.class.getSimpleName();
     private final TextyCallback callback;
     private final Context context;
+    private final HablameAudioManager audioManager;
     private TextToSpeech textToSpeech;
+    private boolean mTtsInitialized = false;
+    private String message;
 
 
-    public Texty(Context context, TextyCallback callback) {
+    public Texty(Context context, TextyCallback callback, HablameAudioManager audioManager) {
         this.context = context;
         this.callback = callback;
-        create();
+        this.audioManager = audioManager;
+        this.textToSpeech = new TextToSpeech(context, this);
+        this.textToSpeech.setOnUtteranceProgressListener(this);
+
+        new Timer("waitForTTS", true).schedule(new TimerTask() {
+            @Override
+            public void run() {
+                onDone(null);
+            }
+        }, 3000);
     }
 
     public void speak(String message) {
-        if (message != null) {
-            if (!this.textToSpeech.isSpeaking()) {
-                //TODO: Add check if chatbotAnswer is may bigger than getMaxSpeechInputLength() of TextToSpeech!
-                int status = -1;
-                if (Build.VERSION.SDK_INT >= 21) {
-                    status = this.textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
-                } else if (Build.VERSION.SDK_INT < 21) {
-                    status = this.textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
-                }
-                Log.i(TAG, "textToSpeech " + status);
-            }
-        } else {
-            Log.d(TAG, "Something is null: tts " + textToSpeech + " chatbot " + message);
+
+        if(mTtsInitialized){
+            this.textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, "hablame");
         }
-        textToSpeech.setOnUtteranceProgressListener(this);
-    }
-
-
-    public void create() {
-        this.textToSpeech = new TextToSpeech(context, this);
     }
 
     public void stop() {
@@ -72,22 +72,32 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
 
     @Override
     public void onStart(final String utteranceId) {
-
+        this.audioManager.isSpeaking(true);
+        this.audioManager.isListening(false);
     }
 
     @Override
     public void onDone(final String utteranceId) {
         this.callback.doneWithTts();
+
     }
 
     @Override
     public void onError(final String utteranceId) {
-
+        Log.d(TAG, "ERROR IN TTS: " + utteranceId);
+        onDone(utteranceId);
     }
 
     @Override
     public void onInit(final int status) {
-        textToSpeech.setLanguage(Locale.GERMANY);
+        if (status == TextToSpeech.SUCCESS) {
+            this.mTtsInitialized = true;
+            Log.d(TAG, "INTIZIALIZED TTS");
+            this.textToSpeech.setLanguage(Locale.GERMAN);
+            this.textToSpeech.speak(context.getString(R.string.startstring), TextToSpeech.QUEUE_FLUSH, null, "startstring");
+        }else if (status == TextToSpeech.ERROR) {
+            Toast.makeText(context, "Text Ausgabe funktioniert nicht", Toast.LENGTH_LONG).show();
+        }
     }
 
     public interface TextyCallback {

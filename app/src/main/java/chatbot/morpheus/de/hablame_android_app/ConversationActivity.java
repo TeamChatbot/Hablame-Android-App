@@ -10,6 +10,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,7 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-public class ConversationActivity extends Activity implements UiCallBack {
+public class ConversationActivity extends Activity implements UiCallBack{
     private static final String TAG = ConversationActivity.class.getSimpleName();
     private static final long PROGRESS_ANIMATION_DURATION = 250; // 0.25 second
     private final List<ObjectAnimator> progressAnimators = new ArrayList<ObjectAnimator>();
@@ -49,7 +50,6 @@ public class ConversationActivity extends Activity implements UiCallBack {
 
     //Other
     protected static ProgressBar speechInputLevel;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +109,6 @@ public class ConversationActivity extends Activity implements UiCallBack {
         recognitionService = new Intent(this, ConversationService.class);
         bindService(recognitionService, mConnection, Context.BIND_AUTO_CREATE);
     }
-
 
     private void toEditText() {
         userName.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
@@ -216,9 +215,7 @@ public class ConversationActivity extends Activity implements UiCallBack {
                 if (soundLevel > speechInputLevel.getMax()) {
                     speechInputLevel.setMax(soundLevel);
                 }
-
                 progressAnimators.get(soundLevel).start();
-                //Log.d(TAG, "Progress " + soundLevel + " value " + value + " with max " + speechInputLevel.getMax());
                 speechInputLevel.setProgress(soundLevel);
             }
         });
@@ -244,5 +241,6 @@ public class ConversationActivity extends Activity implements UiCallBack {
         animation.setInterpolator(acc);
         return animation;
     }
+
 
 }

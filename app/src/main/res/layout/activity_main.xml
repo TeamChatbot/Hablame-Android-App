@@ -55,7 +55,6 @@
             android:background="@drawable/textfield"
             android:gravity="center"
             android:hint="@string/wieistdeinname"
-            android:textColorHint="@color/background_material_dark"
             android:inputType="textPersonName"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
