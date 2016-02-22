@@ -15,6 +15,10 @@ import java.util.Locale;
 
 /**
  * Created by Orrimp on 15/02/16.
+ * Please take a look at the sequence diagram in the doc folder.
+ * SpeechRecoginzer is only on when TextToSpeech is off.
+ * Have to desroy and rebuild it compeletely anew to ensure stable usage.
+ * OnError case the SpeechRecognizer is useless, recreate.
  */
 public class Speechy implements RecognitionListener {
 
@@ -23,77 +27,113 @@ public class Speechy implements RecognitionListener {
     private final Intent intent;
     private final SpeechyCallback callback;
     private final HablameAudioManager audioManager;
-    private final Looper mainLopper;
+    private final Handler handler;
     private SpeechRecognizer recog;
 
-    public Speechy(Context context, SpeechyCallback callback, HablameAudioManager audioManager, final Looper mainLooper) {
+    //Need few Runnables because actions done on SpeechRecognizer have to be executed on MainThread (MainLooper)
+    private Runnable destroy = new Runnable() {
+        @Override
+        public void run() {
+            destroy();
+        }
+    };
+    private Runnable destroyAndCreate = new Runnable() {
+        @Override
+        public void run() {
+            createAndStart();
+        }
+    };
+    private Runnable create = new Runnable() {
+        @Override
+        public void run() {
+            createAndStart();
+        }
+    };
+    private Runnable pause = new Runnable() {
+        @Override
+        public void run() {
+            stopRecog();
+        }
+    };
+
+
+    /** Creates the meta data for the SpeechRecognizer including the language model, langauge and results
+     * @param context Context, should be ApplicationContext
+     * @param callback Callback to be informed about the result of the speechrecognition
+     * @param audioManager Audiomanager to handle speakers
+     * @param handler Handler from the MainLoop (onCreate has one) becasue SpeechReocognizer need MainLoop
+     */
+    public Speechy(Context context, SpeechyCallback callback, HablameAudioManager audioManager, final Handler handler) {
         this.contex = context;
         this.callback = callback;
         this.audioManager = audioManager;
-        this.mainLopper = mainLooper;
+        this.handler = handler;
 
         this.intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         this.intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         this.intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.GERMANY); //fuer spanisch durch localeSpanish ersetzen
         this.intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1); //I need only the best result not all
     }
-
     /**
      * SpeechRecognizer should be used only from the application's main thread.
-     * @return
+     * Restarts the Engine by creating a new one, registering listener and start listening
+     * @return Instanze of created SpeechRecognizer, always a new one
      */
     private SpeechRecognizer createAndStart() {
         //User will talk, don't disturb with sounds
-        this.audioManager.isSpeaking(false);
         this.audioManager.isListening(true);
 
-        Handler handler = new Handler(this.mainLopper);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                recog = SpeechRecognizer.createSpeechRecognizer(contex);
-                recog.setRecognitionListener(Speechy.this);
-                recog.startListening(intent);
-            }
-        });
+        recog = SpeechRecognizer.createSpeechRecognizer(contex);
+        recog.setRecognitionListener(Speechy.this);
+        recog.startListening(intent);
 
         return this.recog;
     }
 
+    /**
+     * Restarts the SpeechRecognizer by destroying the current one and creating a new one
+     */
     public void restartRecog() {
-        destroy();
-        createAndStart();
+        handler.post(destroyAndCreate);
     }
 
+    /**
+     * Stops the SpeechRecognizer without destroying it
+     */
     public void stopRecog() {
         if (recog != null) {
-            this.recog.cancel();
+           handler.post(pause);
         }
     }
 
+    /**
+     * Destroys the Speechrecognizer and releases all resources
+     */
     public void destroy() {
         if (recog != null) {
-            this.recog.cancel();
-            this.recog.destroy();
+           handler.post(destroy);
         }
-        audioManager.isSpeaking(true);
         audioManager.isListening(true);
-
     }
 
+    /** Informs this instance about the state of the SpeechRecognizer. Is called after the first sound is trigged.
+     * @param params I do not know whats inside.
+     */
     @Override
     public void onReadyForSpeech(final Bundle params) {
         Log.d(TAG, "I am ready");
-        //Disable ready sound of speech recognizer by setting volume to 0
 
     }
 
     @Override
     public void onBeginningOfSpeech() {
-        //User is talking we should enable media sound again
     }
 
 
+    /** Informs this instance about the change in the sound level.
+     * It is about value of max value of 10. (I dont even know why)
+     * @param rmsdB
+     */
     @Override
     public void onRmsChanged(final float rmsdB) {
         this.callback.onSoundLevelChanged(rmsdB);
@@ -104,6 +144,10 @@ public class Speechy implements RecognitionListener {
 
     }
 
+    /**
+     * I am done listening but not done processing
+     * Reset the sound level to 0.
+     */
     @Override
     public void onEndOfSpeech() {
         Log.d(TAG, "Done with listening");
@@ -113,14 +157,16 @@ public class Speechy implements RecognitionListener {
     @Override
     public void onError(final int error) {
         String errorMessage = SpeechyErrorDescription.getErrorText(error);
-        Log.d(TAG, "FAILED " + errorMessage);
-        //TODO What do to in case of errror?
+        Log.d(TAG, "FAILED " + errorMessage + ", restarting SpeechRecoqnition");
         restartRecog();
     }
 
+    /** Contains all the data of processed speech recognition including the spoken String and confidence value of its accuracity
+     * The string with highges accuracity is at index 0.
+     * @param results Contains the data in RESULTS_RECOGNITION and CONFIDENCE_SCORES.
+     */
     @Override
     public void onResults(final Bundle results) {
-        //In case TextToSpeech wants to say something enable media volume
         final ArrayList<String> text = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         final float[] confi = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
         if (text.size() > 0 && confi.length > 0) {
@@ -140,6 +186,9 @@ public class Speechy implements RecognitionListener {
     }
 
 
+    /**
+     * Event to inform the service about the important data from SpeechReognizer including result and sound level.
+     */
     public interface SpeechyCallback {
         /**
          * Returns the result of SpeechEngine with the best result and corresponding confidence level

@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.speech.tts.TextToSpeech;
@@ -17,6 +18,9 @@ import com.mashape.unirest.http.HttpResponse;
 import de.fhws.hablame.service.api.HablameClient;
 
 
+/**
+ * Service to handle SpeechRecognizer, TextToSpeech and WebService requests.
+ */
 public class ConversationService extends Service implements Speechy.SpeechyCallback, Texty.TextyCallback {
 
     private static final String TAG = ConversationService.class.getSimpleName();
@@ -28,7 +32,11 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
     private Speechy speechy;
     private Texty texty;
     private boolean paused = false;
+    private Handler handler;
 
+    /**
+     * Binder pattern to allow the Activity full controll over this service.
+     */
     public class LocalBinder extends Binder {
         public ConversationService getService() {
             return ConversationService.this;
@@ -40,30 +48,48 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
         return this.binder;
     }
 
+    /**
+     * Creates new Instanzes of SpeechRecognizer and TextToSpeech with initial data.
+     * TextToSpeech is first to go and Recognizer follows. Always alternating between those two.
+     */
     public void onCreate() {
 
+        this.handler = new Handler();
+
         this.audioManager = new HablameAudioManager(getBaseContext());
-        this.speechy = new Speechy(getApplicationContext(), this, this.audioManager, getMainLooper());
+        this.speechy = new Speechy(getApplicationContext(), this, this.audioManager, handler);
         this.texty = new Texty(getApplicationContext(), this, this.audioManager);
+        this.texty.speakWhenReady(getString(R.string.startstring));
 
         //TODO webService = new WebService();
         this.client = new HablameClient();
-
     }
 
+    /** Contains the result of SpeechReognizer.
+     * Following sequence is required:
+     * 0) Destroy SpeechRecognizer
+     * 1) Inform the UI about the recoqnized spoken text
+     * 2) Get answer from the sever for this text
+     * 3) CreateTTS and Wait for it to be ready (The earlier done the better)
+     * 4) Let TTS speak the answer.
+     * 5) Show the text on UI
+     * @param bestResult Firs and therefore best result in matching spoken words to text
+     * @param confidence Confidence value from 0 to 1 for understanding the user
+     */
     @Override
     public void onResult(final String bestResult, final float confidence) {
-
+        this.speechy.destroy();
+        this.texty.createAndWaitTts();
         this.callback.onTextSpoken(bestResult);
         final String chatbotAnswer = getServerResponse(bestResult);
         this.callback.onTextReceived(chatbotAnswer);
-
-        this.speechy.stopRecog();
-        this.texty.speak(chatbotAnswer);
-
+        this.texty.speakWhenReady(chatbotAnswer);
         Log.i(TAG, "Responses: " + bestResult + " Answer: " + chatbotAnswer);
     }
 
+    /** Contains information about the sound level from the SpeechRecognizer
+     * @param value Value in dB could be from -2 to 10 or so
+     */
     @Override
     public void onSoundLevelChanged(final float value) {
         if (this.callback != null) {
@@ -71,20 +97,33 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
         }
     }
 
+    /**
+     * TextToSpeech is done we can now restart SpeechRecognizer.
+     * 1) Destroy TTS,
+     * 2) Create SpeechRecognizer
+     * 3) Mute Speakers
+     */
     @Override
     public void doneWithTts() {
         Log.d(TAG, "Done with Speaking");
-        speechy.restartRecog();
+        this.texty.destroy();
+        this.speechy.restartRecog();
         this.audioManager.isListening(true);
-        this.audioManager.isSpeaking(false);
     }
 
+    /** Start service by registering callbacks
+     * @param callBack
+     */
     public void startService(UiCallBack callBack) {
         this.callback = callBack;
         Log.d(TAG, "Bound to Activity");
     }
 
 
+    /** Get Server Response for the spoken text
+     * @param speechInput Spoken and identified text by SpeechRecognizer
+     * @return String with Bot answer
+     */
     private String getServerResponse(final String speechInput) {
         try {
             final Future<HttpResponse<String>> future = this.client.getReplyForMessageAsync(speechInput);
@@ -96,36 +135,36 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
         return "";
     }
 
+    /**
+     * Destroys SpeechRecognizer and TextToSpeech
+     */
     public void onDestroy() {
-        abondonAudioFocus();
         super.onDestroy();
-        speechy.destroy();
-        texty.destroy();
+        this.audioManager.abandonAudioFocus();
+        this.speechy.destroy();
+        this.texty.destroy();
 
     }
 
+    /**
+     * Pause everthing
+     */
     public void onPause() {
         paused = true;
-        abondonAudioFocus();
-        speechy.stopRecog();
-        texty.stop();
+        this.audioManager.abandonAudioFocus();
+        this.speechy.stopRecog();
+        this.texty.stop();
     }
 
+    /**
+     * Resume everthing only when paused once.
+     * Activity calles onResume immediatly after onCreate
+     */
     public void onResume() {
         if (paused) {
-            requestAudioFocus();
-            speechy.restartRecog();
+            this.audioManager.requestAudioFocus();
+            this.speechy.restartRecog();
         }
         paused = false;
     }
-
-    private void abondonAudioFocus() {
-        this.audioManager.abandonAudioFocus();
-    }
-
-    private void requestAudioFocus() {
-        this.audioManager.requestAudioFocus();
-    }
-
-
 }

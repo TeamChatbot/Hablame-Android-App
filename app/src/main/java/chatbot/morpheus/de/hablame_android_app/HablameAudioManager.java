@@ -4,7 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.speech.tts.TextToSpeech;
 
-/**
+/** Has to handle everthing concerinng AudioManager like muting and unmuting the speakers and microphone
  * Created by Orrimp on 20/02/16.
  */
 public class HablameAudioManager implements AudioManager.OnAudioFocusChangeListener {
@@ -26,29 +26,33 @@ public class HablameAudioManager implements AudioManager.OnAudioFocusChangeListe
     }
 
 
+    /**
+     * For speakers output we need audiofocus for DEFAULT_STREAM == MUSIC_STREAM
+     */
     public void requestAudioFocus() {
         this.audioManager.requestAudioFocus(this, TextToSpeech.Engine.DEFAULT_STREAM, AudioManager.AUDIOFOCUS_GAIN);
     }
 
+    /**
+     * Abandon Audiofocus in case of app minimized
+     */
     public void abandonAudioFocus() {
         this.audioManager.abandonAudioFocus(this);
     }
 
+    /**
+     * Could be used to identify when TTS and Speechrecognizer is using AudioManager because they steal audio focus
+     * @param focusChange
+     */
     @Override
     public void onAudioFocusChange(final int focusChange) {
 
     }
 
+    /** I am listening to the user right now, turn on or off the micro
+     * @param microphoneMute
+     */
     public void isListening(final boolean microphoneMute) {
         this.audioManager.setMicrophoneMute(!microphoneMute);
     }
-
-    public void isSpeaking(final boolean muteSpeakers){
-        this.setSoundVolume(muteSpeakers ? streamVolume :  0 );
-    }
-
-    private void setSoundVolume(final int streamVolume) {
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, streamVolume, 0); // again setting the system volume back to the original, un-mutting
-    }
-
 }
