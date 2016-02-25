@@ -50,6 +50,8 @@ public class ConversationActivity extends Activity implements UiCallBack{
 
     //Other
     protected static ProgressBar speechInputLevel;
+    private Intent openFEFA = null;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class ConversationActivity extends Activity implements UiCallBack{
         final Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Logobloqo2.ttf");
         final UsersData currentUser = new UsersData(this);
         inputMethod = ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE));
+        context = this;
 
         userMessage = (TextView) findViewById(R.id.tvUserMessage);
 
@@ -188,6 +191,21 @@ public class ConversationActivity extends Activity implements UiCallBack{
             @Override
             public void run() {
                 userMessage.setText(text);
+
+                //startet FEFA Activity
+                    String buzzwordKoepfe = "starte köpfetest";
+                    String buzzwordAugen = "starte augentest";
+                    if (text.toLowerCase().contains(buzzwordKoepfe)) {
+                        //öffnet FEFA Activity
+                        openFEFA = new Intent(context, FEFATest.class);
+                        openFEFA.putExtra("modus", buzzwordKoepfe);
+                        startActivity(openFEFA);
+                    } else if (text.toLowerCase().contains(buzzwordAugen) == true) {
+                        //öffnet FEFA Activity
+                        openFEFA = new Intent(context, FEFATest.class);
+                        openFEFA.putExtra("modus", buzzwordAugen);
+                        startActivity(openFEFA);
+                    }
             }
         });
     }

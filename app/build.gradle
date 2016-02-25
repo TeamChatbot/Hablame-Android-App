@@ -1,15 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 22
     buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "chatbot.morpheus.de.hablame_android_app"
         minSdkVersion 17
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode 2
         versionName "1.2"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -21,6 +22,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:appcompat-v7:22.2.0'
     compile files('lib/HablameServiceApiLibrary-jar-with-dependencies.jar')
+
 }

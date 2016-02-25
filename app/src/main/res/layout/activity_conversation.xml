@@ -2,7 +2,8 @@
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#98B96F">
+                android:background="#98B96F"
+    android:clickable="false">
 
     <ImageButton
         android:id="@+id/logoGreen"

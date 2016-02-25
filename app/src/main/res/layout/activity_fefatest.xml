@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="chatbot.morpheus.de.hablame_android_app.FEFATest"
+    android:id="@+id/content"
+    android:background="#98B96F">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bild"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/eigenschaften"
+        android:layout_below="@+id/bild"
+        android:layout_centerHorizontal="true"
+        android:choiceMode="singleChoice"
+        android:clickable="true"
+        android:background="@drawable/my_selector"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="weiter"
+        android:id="@+id/confirmButton"
+        android:layout_alignBottom="@+id/eigenschaften"
+        android:layout_centerHorizontal="true"
+        android:textColor="#000000"
+        android:background="#5F872E" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="X"
+        android:id="@+id/exitButton"
+        android:layout_below="@+id/bild"
+        android:layout_alignParentEnd="true"
+        android:textColor="#ffffff"
+        android:background="#F44336" />
+
+</RelativeLayout>
