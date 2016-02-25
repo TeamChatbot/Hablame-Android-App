@@ -1,6 +1,7 @@
 package chatbot.morpheus.de.hablame_android_app;
 
 import android.content.Context;
+import android.os.Build;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
@@ -142,7 +143,11 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
      */
     private void speak(final String message) {
         if (message != null) {
-            this.textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, "hablame");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                this.textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null, "hablame");
+            }else{
+                this.textToSpeech.speak(message, TextToSpeech.QUEUE_FLUSH, null);
+            }
         }
     }
 
