@@ -3,7 +3,10 @@ package chatbot.morpheus.de.hablame_android_app;
 
 import android.app.Activity;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,18 @@ public class SoundPoolManager {
     }
 
     public static void CreateInstance() {
+
+
+//        final MediaPlayer p = MediaPlayer.create(applicationContext, R.raw.crow);
+//        p.prepareAsync();
+//        p.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//            @Override
+//            public void onPrepared(final MediaPlayer mp) {
+//                p.start();
+//            }
+//        });
+
+
         if (instance == null) {
             instance = new SoundPoolManager();
         }

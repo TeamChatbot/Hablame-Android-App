@@ -56,12 +56,16 @@ public class Speechy implements RecognitionListener {
         }
     };
 
+    private boolean pauseRecog = false;
 
-    /** Creates the meta data for the SpeechRecognizer including the language model, langauge and results
-     * @param context Context, should be ApplicationContext
-     * @param callback Callback to be informed about the result of the speechrecognition
+
+    /**
+     * Creates the meta data for the SpeechRecognizer including the language model, langauge and results
+     *
+     * @param context      Context, should be ApplicationContext
+     * @param callback     Callback to be informed about the result of the speechrecognition
      * @param audioManager Audiomanager to handle speakers
-     * @param handler Handler from the MainLoop (onCreate has one) becasue SpeechReocognizer need MainLoop
+     * @param handler      Handler from the MainLoop (onCreate has one) becasue SpeechReocognizer need MainLoop
      */
     public Speechy(Context context, SpeechyCallback callback, HablameAudioManager audioManager, final Handler handler) {
         this.contex = context;
@@ -74,9 +78,11 @@ public class Speechy implements RecognitionListener {
         this.intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.GERMANY); //fuer spanisch durch localeSpanish ersetzen
         this.intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1); //I need only the best result not all
     }
+
     /**
      * SpeechRecognizer should be used only from the application's main thread.
      * Restarts the Engine by creating a new one, registering listener and start listening
+     *
      * @return Instanze of created SpeechRecognizer, always a new one
      */
     private SpeechRecognizer createAndStart() {
@@ -94,7 +100,11 @@ public class Speechy implements RecognitionListener {
      * Restarts the SpeechRecognizer by destroying the current one and creating a new one
      */
     public void restartRecog() {
-        handler.post(destroyAndCreate);
+        if (!pauseRecog) {
+            handler.post(destroyAndCreate);
+        } else {
+            handler.post(destroy);
+        }
     }
 
     /**
@@ -102,7 +112,7 @@ public class Speechy implements RecognitionListener {
      */
     public void stopRecog() {
         if (recog != null) {
-           handler.post(pause);
+            handler.post(pause);
         }
     }
 
@@ -111,12 +121,14 @@ public class Speechy implements RecognitionListener {
      */
     public void destroy() {
         if (recog != null) {
-           handler.post(destroy);
+            handler.post(destroy);
         }
         audioManager.isListening(true);
     }
 
-    /** Informs this instance about the state of the SpeechRecognizer. Is called after the first sound is trigged.
+    /**
+     * Informs this instance about the state of the SpeechRecognizer. Is called after the first sound is trigged.
+     *
      * @param params I do not know whats inside.
      */
     @Override
@@ -130,8 +142,10 @@ public class Speechy implements RecognitionListener {
     }
 
 
-    /** Informs this instance about the change in the sound level.
+    /**
+     * Informs this instance about the change in the sound level.
      * It is about value of max value of 10. (I dont even know why)
+     *
      * @param rmsdB
      */
     @Override
@@ -161,8 +175,10 @@ public class Speechy implements RecognitionListener {
         restartRecog();
     }
 
-    /** Contains all the data of processed speech recognition including the spoken String and confidence value of its accuracity
+    /**
+     * Contains all the data of processed speech recognition including the spoken String and confidence value of its accuracity
      * The string with highges accuracity is at index 0.
+     *
      * @param results Contains the data in RESULTS_RECOGNITION and CONFIDENCE_SCORES.
      */
     @Override
@@ -183,6 +199,14 @@ public class Speechy implements RecognitionListener {
     public void onEvent(final int eventType, final Bundle params) {
         //Reserved ...
         //Could be used to handle mute and unmute way better
+    }
+
+    public void onResume() {
+        this.pauseRecog = false;
+    }
+
+    public void onPause() {
+        this.pauseRecog = true;
     }
 
 

@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.text.InputType;
@@ -29,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-public class ConversationActivity extends Activity implements UiCallBack{
+public class ConversationActivity extends Activity implements UiCallBack {
     private static final String TAG = ConversationActivity.class.getSimpleName();
     private static final long PROGRESS_ANIMATION_DURATION = 250; // 0.25 second
     private final List<ObjectAnimator> progressAnimators = new ArrayList<ObjectAnimator>();
@@ -111,6 +113,7 @@ public class ConversationActivity extends Activity implements UiCallBack{
          */
         recognitionService = new Intent(this, ConversationService.class);
         bindService(recognitionService, mConnection, Context.BIND_AUTO_CREATE);
+
     }
 
     private void toEditText() {
@@ -191,23 +194,9 @@ public class ConversationActivity extends Activity implements UiCallBack{
             @Override
             public void run() {
                 userMessage.setText(text);
-
-                //startet FEFA Activity
-                    String buzzwordKoepfe = "starte köpfetest";
-                    String buzzwordAugen = "starte augentest";
-                    if (text.toLowerCase().contains(buzzwordKoepfe)) {
-                        //öffnet FEFA Activity
-                        openFEFA = new Intent(context, FEFATest.class);
-                        openFEFA.putExtra("modus", buzzwordKoepfe);
-                        startActivity(openFEFA);
-                    } else if (text.toLowerCase().contains(buzzwordAugen) == true) {
-                        //öffnet FEFA Activity
-                        openFEFA = new Intent(context, FEFATest.class);
-                        openFEFA.putExtra("modus", buzzwordAugen);
-                        startActivity(openFEFA);
-                    }
             }
         });
+        //startet FEFA Activity
     }
 
     @Override
