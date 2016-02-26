@@ -7,12 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Typeface;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.MediaStore;
-import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -28,7 +24,6 @@ import android.widget.TextView;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Queue;
 
 public class ConversationActivity extends Activity implements UiCallBack {

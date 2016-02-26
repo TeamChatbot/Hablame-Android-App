@@ -3,27 +3,41 @@ package chatbot.morpheus.de.hablame_android_app;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.Callable;
+
+import jxl.Workbook;
+import jxl.WorkbookSettings;
+import jxl.write.*;
+import jxl.write.Number;
 
 public class FEFAActivity extends Activity implements AdapterView.OnItemClickListener {
     private static final String TAG = FEFAActivity.class.getSimpleName();
-    public static final String BUZZWORD_HEAD = "starte köpfetest";
+    public static final String BUZZWORD_HEAD = "starte köpfe test";
     public static final String BUZZWORD_EYE = "starte augentest";
     public static final String EXTRAK_KEY = "modus";
     private static final String baseUrl = "http://194.95.221.229:8080/fefatest";
@@ -37,6 +51,9 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
     private String modus;
     private ImageView imageView;
     private MetaData metaData;
+    String username;
+
+    MediaPlayer p = new MediaPlayer();
 
 
     @Override
@@ -48,7 +65,7 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
         this.eigenschaften.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, eigenschaftenListe));
 
         this.imageView = (ImageView) findViewById(R.id.bild);
-        String username = new UsersData(this).loadFromPreferences();
+        username = new UsersData(this).loadFromPreferences();
         new LoadMetaData().execute((Void) null);
         eigenschaften.setOnItemClickListener(this);
 
@@ -58,54 +75,18 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
     public void onItemClick(final AdapterView<?> parent, final View view, final int position, final long id) {
         final String s = eigenschaften.getItemAtPosition(position).toString();
         spieleLogik(s, metaData);
-        if(durchlauf <= meta.size()){
+        if(durchlauf < meta.size()){
             this.metaData = this.meta.get(ermittleZahl(meta.size()));
             ladeBilder(metaData);
         }else{
-            //TODO Exit game
-            //this.finish();
-            //Toast
+            Toast.makeText(getBaseContext(), "Das hast du gut gemacht. Du hast alle Bilder beantwortet.", Toast.LENGTH_LONG).show();
+            erstelleStatistik(right, wrong, durchlauf);
+            this.finish();
         }
     }
 
 
-//        confirmButton.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View v) {
-//                Intent intent = getIntent();
-//                String modus = intent.getStringExtra("modus");
-//
-//                //s = eigenschaften.getSelectedItem().toString();
-//
-//
-//                if (modus.toLowerCase().contains("starte köpfetest")) {
-//                    switch (durchlauf){
-//                        case 50:
-//                            Toast.makeText(getBaseContext(), "Das hast du gut gemacht.", Toast.LENGTH_LONG).show();
-//                            onStop();
-//                            onDestroy();
-//                            break;
-//                        default:
-//                            ladeBilder();
-//                    }
-//                }
-//                else if (modus.toLowerCase().contains("starte augentest")) {
-//                    switch (durchlauf){
-//                        case 40:
-//                            Toast.makeText(getBaseContext(), "Das hast du gut gemacht.", Toast.LENGTH_LONG).show();
-//                            onStop();
-//                            onDestroy();
-//                            break;
-//                        default:
-//                            ladeBilder();
-//                    }
-//                }
-//            }
-//        });
-//
-//}
-
     //ermittelt random Zahl für zufällig Bildauswahl
-
     public int ermittleZahl(int n) {
         final Random randomZahl = new Random(System.currentTimeMillis());
         return randomZahl.nextInt(n);
@@ -118,7 +99,6 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
 
         if (modus.equals(BUZZWORD_HEAD)) {
             bildurl = baseUrl + "/Koepfe/" + meta.fileName;
-            ;
 
         } else if (modus.equals(BUZZWORD_EYE)) {
             bildurl = baseUrl + "/Augen/" + meta.fileName;
@@ -143,74 +123,86 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
 
     //spielt den Ton ab
     public void soundPlayback() {
-        //TODO ADD SOUNDS
+        p = MediaPlayer.create(this, R.raw.crow);
+        p.start();
     }
 
+    //erstellt Statistik und speichert diese in ein xls File
+    public void erstelleStatistik(int r, int w, int d) {
 
-    //ertellt die Statistik und speichert diese auf dem Gerät
-    public void erstelleStatistik(int r, int w) {
+        WritableWorkbook workbook;
+        String testartT = "";
+        String festzahl = "";
+        String durchlaufD = ""+d+"";
 
-        /*Intent intent = getIntent();
-        String modus = intent.getStringExtra("modus");
-
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         Date date = new Date();
         String dateString = dateFormat.format(date).toString();
-        //String username = UsersData.USERNA_NAME;
-
-        String augencounter = durchlauf+"/40 Bilder beantwortet";
-        String kopfcounter = durchlauf+"/50 Bilder beantwortet";
 
 
-        String filename = "Statistik " + username + " " + dateString + ".xls";
+        String dateiname = "Statistik "+ username +" "+ dateString +".xls";
+        File sdCard = Environment.getExternalStorageDirectory();
+        File directory = new File (sdCard.getAbsolutePath() + "/FEFA-Test");
 
-        java.io.File file = new java.io.File(inputFile);
+        directory.mkdirs();
+
+        File file = new File(directory, dateiname);
+
         WorkbookSettings wbSettings = new WorkbookSettings();
 
         wbSettings.setLocale(new Locale("de", "DE"));
 
-        WritableWorkbook workbook = Workbook.createWorkbook(file, wbSettings);
-        workbook.createSheet("Testergebnisse", 0);
-        WritableSheet excelSheet = workbook.getSheet(0);
-
-        addCaption(excelSheet, 0, 0, "Name");
-        addCaption(excelSheet, 1, 0, "Testerart");
-        addCaption(excelSheet, 2, 0, "Richtig");
-        addCaption(excelSheet, 3, 0, "Falsch");
-
-        addCaption(excelSheet, 0, 1, username);
-        addNumber(excelSheet, 2, 1, r);
-        addNumber(excelSheet, 3, 1, w);
-
-        if (modus.toLowerCase().contains("starte köpfetest")) {
-            addCaption(excelSheet, 1, 1, "Köpfetest");
-            addCaption(excelSheet, 0, 3, kopfcounter);
+        if (modus.equals(BUZZWORD_HEAD)){
+            testartT = "Köpfetest";
+            festzahl = "50";
         }
-        else if (modus.toLowerCase().contains("starte augentest")) {
-            addCaption(excelSheet, 1, 1, "Augentest");
-            addCaption(excelSheet, 0, 3, augencounter);
+        else if (modus.equals(BUZZWORD_EYE)){
+            testartT = "Augentest";
+            festzahl = "40";
         }
+
+        try {
+
+            workbook = Workbook.createWorkbook(file, wbSettings);
+            WritableSheet sheet = workbook.createSheet("Ergebnisse", 0);
+            Label name = new Label(0, 0, "Name");
+            Label testart = new Label(0, 1, "Testart");
+            Label richtig = new Label(0, 2, "Richtig");
+            Label falsch = new Label(0, 3, "Falsch");
+            Label durchlauf = new Label(0, 4, "Durchläufe");
+            Label nameV = new Label(1, 0, username);
+            Label testartV = new Label(1, 1, testartT);
+            Number richtigV = new Number(1, 2, r);
+            Number falschV = new Number(1, 3, w);
+            Label duchlaufV = new Label(1, 4, durchlaufD+ "/" + festzahl);
+
+            sheet.addCell(name);
+            sheet.addCell(testart);
+            sheet.addCell(richtig);
+            sheet.addCell(falsch);
+            sheet.addCell(durchlauf);
+            sheet.addCell(nameV);
+            sheet.addCell(testartV);
+            sheet.addCell(richtigV);
+            sheet.addCell(falschV);
+            sheet.addCell(duchlaufV);
 
         workbook.write();
-        workbook.close();
+            workbook.close();
 
-        newN.setOutputFile("c:/temp/lars.xls");
-        newN.write();*/
-    }
-
-
-    public void export() {
-        //Exportiert Statistik
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 
     @Override
     public void onStop() {
+        erstelleStatistik(right, wrong, durchlauf);
         super.onStop();
-        erstelleStatistik(right, wrong);
     }
 
-
+    //läd Bilder in ImageView anhand von Metadaten und random Zahlermittlung
     private class LoadImage extends AsyncTask<String, String, Bitmap> {
         Bitmap bitmap = null;
 
@@ -230,6 +222,7 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
         }
     }
 
+    //läd Metadaten vom Server
     private class LoadMetaData extends AsyncTask<Void, Void, Void> {
 
         //läd Meta vom Server
@@ -248,7 +241,7 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
             try {
                 URLConnection urlConnection = new URL(urlstring).openConnection();
                 read = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                ;
+
                 String line = "";
 
                 while ((line = read.readLine()) != null) {
@@ -291,5 +284,19 @@ public class FEFAActivity extends Activity implements AdapterView.OnItemClickLis
             this(split[0], split[1], split[2]);
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        erstelleStatistik(right, wrong, durchlauf);
+        super.onBackPressed();
+    }
+
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        p.release();
+    }
+
 }
 

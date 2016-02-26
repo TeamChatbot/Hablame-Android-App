@@ -1,8 +1,5 @@
 package chatbot.morpheus.de.hablame_android_app;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -11,6 +8,9 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.mashape.unirest.http.HttpResponse;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import de.fhws.hablame.service.api.HablameClient;
 
@@ -188,7 +188,7 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
 
 
     /** Starts another Activity when recognizing a certain buzzword
-     * @param text Spoken text with the buzword
+     * @param text Spoken text with the buzzword
      * @return True when the activity is started, else false
      */
     private boolean startAnotherActivity(final String text) {
