@@ -8,8 +8,8 @@ android {
         applicationId "chatbot.morpheus.de.hablame_android_app"
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 2
-        versionName "1.2"
+        versionCode 3
+        versionName "1.3"
         multiDexEnabled true
     }
     buildTypes {

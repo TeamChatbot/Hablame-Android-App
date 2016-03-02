@@ -23,7 +23,7 @@ import java.util.Random;
 
 public class FEFAActivity extends Activity implements AdapterView.OnItemClickListener {
     private static final String TAG = FEFAActivity.class.getSimpleName();
-    public static final String BUZZWORD_HEAD = "starte köpfetest";
+    public static final String BUZZWORD_HEAD = "starte köpfe test";
     public static final String BUZZWORD_EYE = "starte augentest";
     public static final String EXTRAK_KEY = "modus";
     private static final String baseUrl = "http://194.95.221.229:8080/fefatest";

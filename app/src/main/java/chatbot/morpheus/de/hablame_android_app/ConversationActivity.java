@@ -54,6 +54,7 @@ public class ConversationActivity extends Activity implements UiCallBack {
     protected static ProgressBar speechInputLevel;
     private Intent openFEFA = null;
     private Context context;
+    private boolean isUserNameEdited = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class ConversationActivity extends Activity implements UiCallBack {
 
         userName = (EditText) findViewById(R.id.tvUserName);
         userName.setText(currentUser.loadFromPreferences());
+        toTextView();
         userName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(final TextView v, final int actionId, final KeyEvent event) {
@@ -165,7 +167,7 @@ public class ConversationActivity extends Activity implements UiCallBack {
             this.service.onResume();
         }
 
-        if (userName.isInEditMode()) {
+        if (userName.isClickable() && userName.isInEditMode()) {
             inputMethod.showSoftInput(userName, InputMethodManager.SHOW_FORCED);
         }
     }

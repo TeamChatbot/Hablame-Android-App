@@ -40,6 +40,7 @@ public class Speechy implements RecognitionListener {
     private Runnable destroyAndCreate = new Runnable() {
         @Override
         public void run() {
+            destroy();
             createAndStart();
         }
     };
@@ -172,7 +173,7 @@ public class Speechy implements RecognitionListener {
     public void onError(final int error) {
         String errorMessage = SpeechyErrorDescription.getErrorText(error);
         Log.d(TAG, "FAILED " + errorMessage + ", restarting SpeechRecoqnition");
-        restartRecog();
+        handler.post(destroyAndCreate);
     }
 
     /**
