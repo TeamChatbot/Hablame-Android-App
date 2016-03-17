@@ -1,9 +1,7 @@
 package chatbot.morpheus.de.hablame_android_app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
 
 /** Represents the currently loged in user
  * Changing users is done by a long press on hablame logo.
