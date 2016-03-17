@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".FEFAActivity"
-    android:id="@+id/content"
-    android:background="#98B96F">
+<RelativeLayout android:id="@+id/content"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#98B96F"
+                tools:context=".FEFAActivity">
+
+    <ProgressBar
+        android:id="@+id/fefaprogress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:progressTint="#3D7F04"
+        android:secondaryProgressTint="#427cf1"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"/>
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
         android:id="@+id/bild"
-        android:background="@android:color/transparent"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="200dp"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/transparent"/>
+
+    <ListView
         android:id="@+id/eigenschaften"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/bild"
         android:layout_centerHorizontal="true"
+        android:background="@drawable/my_selector"
         android:choiceMode="singleChoice"
-        android:clickable="true"
-        android:background="@drawable/my_selector"/>
+        android:clickable="true"/>
+
 
 </RelativeLayout>

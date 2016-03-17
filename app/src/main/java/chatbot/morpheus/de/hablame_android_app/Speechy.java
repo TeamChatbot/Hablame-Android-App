@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -34,13 +33,14 @@ public class Speechy implements RecognitionListener {
     private Runnable destroy = new Runnable() {
         @Override
         public void run() {
-            destroy();
+            destroyRecog();
         }
     };
+
     private Runnable destroyAndCreate = new Runnable() {
         @Override
         public void run() {
-            destroy();
+            destroyRecog();
             createAndStart();
         }
     };
@@ -88,13 +88,28 @@ public class Speechy implements RecognitionListener {
      */
     private SpeechRecognizer createAndStart() {
         //User will talk, don't disturb with sounds
-        this.audioManager.isListening(true);
+        this.audioManager.setMicroMute(false);
 
         recog = SpeechRecognizer.createSpeechRecognizer(contex);
         recog.setRecognitionListener(Speechy.this);
         recog.startListening(intent);
 
         return this.recog;
+    }
+
+    private void destroyRecog() {
+        if (recog != null) {
+            recog.cancel();
+            recog.stopListening();
+            recog.destroy();
+        }
+    }
+
+    private void stopRecog() {
+        if (recog != null) {
+            recog.cancel();
+            recog.stopListening();
+        }
     }
 
     /**
@@ -111,20 +126,16 @@ public class Speechy implements RecognitionListener {
     /**
      * Stops the SpeechRecognizer without destroying it
      */
-    public void stopRecog() {
-        if (recog != null) {
-            handler.post(pause);
-        }
+    public void stop() {
+        handler.post(pause);
     }
 
     /**
      * Destroys the Speechrecognizer and releases all resources
      */
     public void destroy() {
-        if (recog != null) {
-            handler.post(destroy);
-        }
-        audioManager.isListening(true);
+        handler.post(destroy);
+        audioManager.setMicroMute(true);
     }
 
     /**

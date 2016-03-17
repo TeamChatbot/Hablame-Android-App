@@ -52,7 +52,8 @@ public class HablameAudioManager implements AudioManager.OnAudioFocusChangeListe
     /** I am listening to the user right now, turn on or off the micro
      * @param microphoneMute
      */
-    public void isListening(final boolean microphoneMute) {
-        this.audioManager.setMicrophoneMute(!microphoneMute);
+    public void setMicroMute(final boolean microphoneMute) {
+        this.audioManager.setMicrophoneMute(microphoneMute);
     }
+
 }

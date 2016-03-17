@@ -1,5 +1,6 @@
 package chatbot.morpheus.de.hablame_android_app;
 
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -56,7 +57,7 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
 
         this.audioManager = new HablameAudioManager(getBaseContext());
         this.speechy = new Speechy(getApplicationContext(), this, this.audioManager, handler);
-        this.texty = new Texty(getApplicationContext(), this, this.audioManager);
+        this.texty = new Texty(getApplicationContext(), this, this.audioManager, handler);
         this.texty.speakWhenReady(getString(R.string.startstring));
 
         //TODO webService = new WebService();
@@ -120,7 +121,7 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
         Log.d(TAG, "Done with Speaking");
         this.texty.destroy();
         this.speechy.restartRecog();
-        this.audioManager.isListening(true);
+        this.audioManager.setMicroMute(false);
     }
 
     /**
@@ -169,7 +170,7 @@ public class ConversationService extends Service implements Speechy.SpeechyCallb
         paused = true;
         this.audioManager.abandonAudioFocus();
         this.speechy.onPause();
-        this.speechy.stopRecog();
+        this.speechy.stop();
         this.texty.stop();
     }
 

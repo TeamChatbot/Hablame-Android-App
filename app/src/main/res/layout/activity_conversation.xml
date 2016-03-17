@@ -20,7 +20,7 @@
         android:id="@+id/speechInputLevel"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="32dp"
         android:progressTint="#3D7F04"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"/>

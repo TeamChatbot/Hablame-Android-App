@@ -40,7 +40,7 @@ public class SpeechyErrorDescription
         break;
 
       case SpeechRecognizer.ERROR_SERVER:
-        errorMessage = "error from server";
+        errorMessage = "Error from server";
         break;
 
       case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:

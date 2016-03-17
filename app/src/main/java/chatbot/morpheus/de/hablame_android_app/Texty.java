@@ -2,6 +2,7 @@ package chatbot.morpheus.de.hablame_android_app;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
@@ -22,6 +23,7 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
     private final TextyCallback callback;
     private final Context context;
     private final HablameAudioManager audioManager;
+    private final Handler handler;
     private TextToSpeech textToSpeech;
     private boolean mTtsInitialized = false;
     private String message;
@@ -31,11 +33,13 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
      * @param context Context of the application (getApplicationContext)
      * @param callback Callback to inform about finshed speeaking
      * @param audioManager The audioManager wrapper to handle changes in Speaker and Microphone
+     * @param handler
      */
-    public Texty(Context context, TextyCallback callback, HablameAudioManager audioManager) {
+    public Texty(Context context, TextyCallback callback, HablameAudioManager audioManager, final Handler handler) {
         this.context = context;
         this.callback = callback;
         this.audioManager = audioManager;
+        this.handler = handler;
         createAndWaitTts();
     }
 
@@ -45,8 +49,14 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
      */
     public void createAndWaitTts() {
         this.message = null;
-        this.textToSpeech = new TextToSpeech(context, this);
-        this.textToSpeech.setOnUtteranceProgressListener(this);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                textToSpeech = new TextToSpeech(context, Texty.this);
+                textToSpeech.setOnUtteranceProgressListener(Texty.this);
+            }
+        });
+
     }
 
     /** Informs the TTS about a new message to be spoken.
@@ -77,10 +87,15 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
      */
     public void destroy() {
         if (this.textToSpeech != null) {
-            this.textToSpeech.stop();
-            this.textToSpeech.shutdown();
-            this.textToSpeech = null;
-            this.mTtsInitialized = false;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    textToSpeech.stop();
+                    textToSpeech.shutdown();
+                    textToSpeech = null;
+                    mTtsInitialized = false;
+                }
+            });
         }
     }
 
@@ -99,7 +114,7 @@ public class Texty extends UtteranceProgressListener implements TextToSpeech.OnI
      */
     @Override
     public void onStart(final String utteranceId) {
-        this.audioManager.isListening(false);
+        this.audioManager.setMicroMute(true);
     }
 
     /** Is called when TTS engine is done with speaking
