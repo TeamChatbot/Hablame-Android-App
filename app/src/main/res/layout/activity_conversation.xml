@@ -1,153 +1,71 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
                 android:id="@+id/content"
+                xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="de.morpheus.chatbot.chatbotapp.ConversationActivity">
+                android:background="#98B96F"
+                android:clickable="false"
+                tools:context=".ConversationActivity">
 
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_alignParentTop="true"
-            android:layout_width="fill_parent"
-            android:layout_height="109.33dp"
-            android:background="#4caf50"
-            android:id="@+id/head">
+    <ImageButton
+        android:id="@+id/logoGreen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="15dp"
+        android:layout_centerHorizontal="true"
+        android:background="@mipmap/logo_green"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Háblame"
-                android:textSize="60dp"
-                android:id="@+id/headerTopLine"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                />
+    <ProgressBar
+        android:id="@+id/speechInputLevel"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:progressTint="#3D7F04"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/headerTopLine"
-                android:text="das sprechende Faultier"
-                android:textSize="30dp"
-                android:layout_marginTop="-10dp"
-                android:id="@+id/headerBottomLine"
-                android:layout_gravity="center_horizontal"
-                />
+    <EditText
+        android:id="@+id/tvUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mein Name"
+        android:inputType="none"
+        android:cursorVisible="false"
+        android:clickable="false"
+        style="@style/NormalTextExtended"
+        android:layout_above="@+id/speechInputLevel"
+        android:layout_centerHorizontal="true"/>
 
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tvBotName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Háblame"
+        style="@style/NormalText"
+        android:layout_below="@+id/logoGreen"
+        android:layout_centerHorizontal="true"/>
 
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_below="@id/head"
-            android:layout_width="fill_parent"
-            android:layout_height="1.33dp"
-            android:background="#ffebee"
-            android:id="@+id/linetop">
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tvUserMessage"
+        style="@style/SpeechBubble"
+        android:background="@drawable/bubble2"
+        android:layout_above="@+id/speechInputLevel"
+        android:layout_alignStart="@+id/tvBotMessage"
+        android:layout_marginBottom="36dp"/>
 
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_below="@+id/linetop"
-            android:layout_width="fill_parent"
-            android:layout_height="415.00dp"
-            android:background="#bdbdbd"
-            android:id="@+id/middle">
+    <TextView
+        android:id="@+id/tvBotMessage"
+        style="@style/SpeechBubble"
+        android:background="@drawable/bubble2f"
+        android:layout_below="@+id/tvBotName"
+        android:layout_centerHorizontal="true"/>
 
-        <ImageButton
-                android:layout_width="150.00dp"
-                android:layout_height="150.00dp"
-                android:id="@+id/logoGreen"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="20dp"
-                android:background="@mipmap/logo_green"/>
-
-        <ProgressBar
-                android:id="@+id/speechInputLevel"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_alignParentStart="true"
-                android:layout_below="@+id/turnRecognitionOnOff"
-                android:layout_marginTop="4dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"/>
-
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="userName"
-                android:id="@+id/tvUserName"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="20dp"
-                android:textSize="18dp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_gravity="left"/>
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:layout_marginLeft="20dp"
-                android:text="userMessage"
-                android:id="@+id/tvUserMessage"
-                android:textSize="18dp"
-                android:textStyle="bold"
-                android:layout_gravity="left"
-                />
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Háblame"
-                android:id="@+id/tvBotName"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="20dp"
-                android:textSize="18dp"
-                android:textStyle="bold"
-                android:textColor="#000000"
-                android:layout_gravity="right"/>
-
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:layout_marginLeft="20dp"
-                android:text="botMessage"
-                android:id="@+id/tvBotMessage"
-                android:textSize="18dp"
-                android:textStyle="bold"
-                android:layout_gravity="right"
-                />
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_below="@+id/middle"
-            android:layout_width="fill_parent"
-            android:layout_height="1.33dp"
-            android:background="#ffebee"
-            android:id="@+id/linebottom">
-    </LinearLayout>
-
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_below="@+id/linebottom"
-            android:layout_width="fill_parent"
-            android:layout_height="63.00dp"
-            android:background="#4caf50"
-            android:id="@+id/foot">
-
-        <Button
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Auf Wiedersehen."
-                android:id="@+id/buttonEndConversation"
-                android:layout_gravity="center_horizontal"
-                android:background="@android:color/transparent"/>
-    </LinearLayout>
-
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:layout_above="@+id/tvBotName"
+        android:layout_alignEnd="@+id/tvUserName"
+        android:layout_marginBottom="54dp"/>
 </RelativeLayout>
